@@ -1,4 +1,8 @@
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This is the provided NumberTriangle class to be used in this coding task.
@@ -51,6 +55,18 @@ public class NumberTriangle {
         return root;
     }
 
+    public String toString(){
+        int level = 0;
+        return this.root + "\n" +
+                (this.left != null ? this.left.toString(level + 1):"") +
+                (this.right != null ? this.right.toString(level + 1):"");
+    }
+    public String toString(int level){
+
+        return "\t".repeat(level) + this.root + "\n" +
+                (this.left != null ? this.left.toString(level + 1):"") +
+                (this.right != null ? this.right.toString(level + 1):"");
+    }
 
     /**
      * [not for credit]
@@ -114,16 +130,29 @@ public class NumberTriangle {
 
         // will need to return the top of the NumberTriangle,
         // so might want a variable for that.
-        NumberTriangle top = null;
-
+        ArrayList<NumberTriangle> last_level_nodes = new ArrayList<NumberTriangle>();
+        NumberTriangle top = new NumberTriangle(Integer.parseInt(br.readLine().strip()));
+        last_level_nodes.add(top);
         String line = br.readLine();
         while (line != null) {
-
-            // remove when done; this line is included so running starter code prints the contents of the file
-            System.out.println(line);
-
             // TODO process the line
 
+            String[] numbersAsStrings = line.split(" ");
+            List<Integer> numbers = Arrays.stream(numbersAsStrings).map(Integer::parseInt).collect(Collectors.toList());
+            ArrayList<NumberTriangle> curr_level_nodes = new ArrayList<NumberTriangle>();
+            for(int i = 0; i < last_level_nodes.size(); i++){
+                NumberTriangle node = last_level_nodes.get(i);
+                if (i == 0) {
+                    node.setLeft(new NumberTriangle(numbers.get(i)));
+                    curr_level_nodes.add(node.left);
+                } else {
+                    node.setLeft(curr_level_nodes.get(curr_level_nodes.size() - 1));
+                }
+                node.setRight(new NumberTriangle(numbers.get(i + 1)));
+                curr_level_nodes.add(node.right);
+            }
+            last_level_nodes = curr_level_nodes;
+            // remove when done; this line is included so running starter code prints the contents of the file
             //read the next line
             line = br.readLine();
         }
@@ -133,8 +162,8 @@ public class NumberTriangle {
 
     public static void main(String[] args) throws IOException {
 
-        NumberTriangle mt = NumberTriangle.loadTriangle("input_tree.txt");
-
+        NumberTriangle mt = NumberTriangle.loadTriangle("little_tree.txt");
+        System.out.println(mt);
         // [not for credit]
         // you can implement NumberTriangle's maxPathSum method if you want to try to solve
         // Problem 18 from project Euler [not for credit]
